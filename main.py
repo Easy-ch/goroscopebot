@@ -174,7 +174,6 @@ async def oven(message:types.Message):
         result_text = find[0].get_text(strip=True)
         await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-app=app
 
 if __name__ == '__main__':
     start_webhook(
