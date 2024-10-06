@@ -13,7 +13,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot,storage=storage)
 
 
-WEBHOOK_HOST = 'https://goroscopebot.vercel.app/'
+WEBHOOK_HOST = 'https://goroscopebot.vercel.app'
 WEBHOOK_PATH = f'/{TOKEN}'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
