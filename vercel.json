@@ -1,4 +1,7 @@
 {
+  "project": {
+    "pythonVersion": "3.10"
+  },
   "builds": [
     {
       "src": "main.py",
