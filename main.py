@@ -13,7 +13,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot,storage=storage)
 
 
-WEBHOOK_HOST = 'https://4fe6-188-243-182-2.ngrok-free.app'
+WEBHOOK_HOST = 'https://goroscopebot.vercel.app/'
 WEBHOOK_PATH = f'/{TOKEN}'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
