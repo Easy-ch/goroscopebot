@@ -1,169 +1,105 @@
-from aiogram import Bot,Dispatcher,types
-from aiogram.dispatcher.filters import CommandStart
-from aiogram.utils.executor import start_webhook
-from aiogram.types import ParseMode
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import CommandStart
+from aiogram.fsm.storage.memory import MemoryStorage
 from bs4 import BeautifulSoup
 import requests
 from config import TOKEN
-from aiohttp import web
+from aiogram.client.default import DefaultBotProperties
+import asyncio
 
-
-bot = Bot(token=TOKEN,parse_mode=ParseMode.HTML)
+bot = Bot(token=TOKEN,default=DefaultBotProperties(parse_mode='HTML'))
 storage = MemoryStorage()
-dp = Dispatcher(bot,storage=storage)
+dp = Dispatcher(storage=storage)
+
+# Initialize dp
 
 
-@dp.message_handler(CommandStart())
-async def start_message(message:types.Message):
-    await message.answer("Привет " + message.from_user.first_name + " выбери свой знак зодиака" '\n' + """
-    ♈️ Овен \n
-    ♉ Телец \n
-    ♊ Близнецы \n 
-    ♋️ Рак \n
-    ♌ Лев \n
-    ♍ Дева \n
-    ♎ Весы\n
-    ♏ Скорпион \n
-    ♐ Стрелец \n
-    ♑ Козерог \n
-    ♒ Водолей\n 
-    ♓ Рыбы \n
-""" )
+@dp.message(CommandStart())
+async def start_message(message: types.Message):
+    await message.answer(
+        "Привет " + message.from_user.first_name + " выбери свой знак зодиака" '\n' + """
+        ♈️ Овен \n
+        ♉ Телец \n
+        ♊ Близнецы \n
+        ♋️ Рак \n
+        ♌ Лев \n
+        ♍ Дева \n
+        ♎ Весы\n
+        ♏ Скорпион \n
+        ♐ Стрелец \n
+        ♑ Козерог \n
+        ♒ Водолей\n
+        ♓ Рыбы \n
+    """
+    )
 
-@dp.message_handler(lambda msg: msg.text=='Овен')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/aries/today/'
+async def fetch_horoscope(sign: str, url: str):
     page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
+    soup = BeautifulSoup(page.text, "html.parser")
     find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+    return find[0].get_text(strip=True) if find else "Информация недоступна"
 
+# Define message handlers for each zodiac sign
+@dp.message(F.text == 'Овен')
+async def oven(message: types.Message):
+    result_text = await fetch_horoscope('Овен', 'https://horo.mail.ru/prediction/aries/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
+@dp.message(F.text == 'Телец')
+async def taurus(message: types.Message):
+    result_text = await fetch_horoscope('Телец', 'https://horo.mail.ru/prediction/taurus/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-@dp.message_handler(lambda msg: msg.text=='Телец')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/taurus/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+@dp.message(F.text == 'Близнецы')
+async def gemini(message: types.Message):
+    result_text = await fetch_horoscope('Близнецы', 'https://horo.mail.ru/prediction/gemini/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
+@dp.message(F.text == 'Рак')
+async def cancer(message: types.Message):
+    result_text = await fetch_horoscope('Рак', 'https://horo.mail.ru/prediction/cancer/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-@dp.message_handler(lambda msg: msg.text=='Близнецы')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/gemini/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+@dp.message(F.text == 'Лев')
+async def leo(message: types.Message):
+    result_text = await fetch_horoscope('Лев', 'https://horo.mail.ru/prediction/leo/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
+@dp.message(F.text == 'Дева')
+async def virgo(message: types.Message):
+    result_text = await fetch_horoscope('Дева', 'https://horo.mail.ru/prediction/virgo/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-@dp.message_handler(lambda msg: msg.text=='Рак')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/cancer/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+@dp.message(F.text == 'Весы')
+async def libra(message: types.Message):
+    result_text = await fetch_horoscope('Весы', 'https://horo.mail.ru/prediction/libra/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
+@dp.message(F.text == 'Скорпион')
+async def scorpio(message: types.Message):
+    result_text = await fetch_horoscope('Скорпион', 'https://horo.mail.ru/prediction/scorpio/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-@dp.message_handler(lambda msg: msg.text=='Лев')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/leo/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+@dp.message(F.text == 'Стрелец')
+async def sagittarius(message: types.Message):
+    result_text = await fetch_horoscope('Стрелец', 'https://horo.mail.ru/prediction/sagittarius/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-@dp.message_handler(lambda msg: msg.text=='Дева')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/virgo/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+@dp.message(F.text == 'Козерог')
+async def capricorn(message: types.Message):
+    result_text = await fetch_horoscope('Козерог', 'https://horo.mail.ru/prediction/capricorn/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-@dp.message_handler(lambda msg: msg.text=='Весы')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/libra/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
-    
-@dp.message_handler(lambda msg: msg.text=='Скорпион')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/scorpio/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
+@dp.message(F.text == 'Водолей')
+async def aquarius(message: types.Message):
+    result_text = await fetch_horoscope('Водолей', 'https://horo.mail.ru/prediction/aquarius/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-
-@dp.message_handler(lambda msg: msg.text=='Стрелец')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/sagittarius/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
-
-
-@dp.message_handler(lambda msg: msg.text=='Козерог')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/capricorn/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
-
-
-@dp.message_handler(lambda msg: msg.text=='Водолей')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/aquarius/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
-
-
-@dp.message_handler(lambda msg: msg.text=='Рыбы')
-async def oven(message:types.Message):
-    url = 'https://horo.mail.ru/prediction/pisces/today/'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text,"html.parser")
-    find = soup.findAll('p')
-    if find:
-        result_text = find[0].get_text(strip=True)
-        await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
-
-
+@dp.message(F.text == 'Рыбы')
+async def pisces(message: types.Message):
+    result_text = await fetch_horoscope('Рыбы', 'https://horo.mail.ru/prediction/pisces/today/')
+    await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
 
 if __name__ == '__main__':
-       bot.start_polling()
-
     
