@@ -11,7 +11,11 @@ bot = Bot(token=TOKEN,default=DefaultBotProperties(parse_mode='HTML'))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
-# Initialize dp
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+    
+async def on_shutdown(dp):
+    await bot.delete_webhook()
 
 
 @dp.message(CommandStart())
