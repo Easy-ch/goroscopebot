@@ -6,6 +6,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from bs4 import BeautifulSoup
 import requests
 from config import TOKEN
+from aiohttp import web
 
 
 bot = Bot(token=TOKEN,parse_mode=ParseMode.HTML)
@@ -174,6 +175,17 @@ async def oven(message:types.Message):
         result_text = find[0].get_text(strip=True)
         await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
+async def handle(request):
+    if request.match_info.get('token') == TOKEN:
+        update = await request.json()
+        telegram_update = types.Update(**update)
+        await dp.process_update(telegram_update)
+        return web.Response()
+    else:
+        return web.Response(status=403)
+
+app = web.Application()
+app.router.add_post(f'/{TOKEN}', handle)
 
 
 if __name__ == '__main__':
@@ -186,3 +198,5 @@ if __name__ == '__main__':
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
+    web.run_app(app)
+    
