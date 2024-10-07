@@ -14,21 +14,6 @@ storage = MemoryStorage()
 dp = Dispatcher(bot,storage=storage)
 
 
-WEBHOOK_HOST = 'https://4fe6-188-243-182-2.ngrok-free.app'
-WEBHOOK_PATH = f'/{TOKEN}'
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-
-# webserver settings
-WEBAPP_HOST = 'localhost'  # or ip
-WEBAPP_PORT = 8000
-
-async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
-
-async def on_shutdown(dp):
-    await bot.delete_webhook()
-
-
 @dp.message_handler(CommandStart())
 async def start_message(message:types.Message):
     await message.answer("Привет " + message.from_user.first_name + " выбери свой знак зодиака" '\n' + """
@@ -175,28 +160,10 @@ async def oven(message:types.Message):
         result_text = find[0].get_text(strip=True)
         await message.answer(f'Вот, что говорят звезды про {message.text}:\n{result_text}')
 
-async def handle(request):
-    if request.match_info.get('token') == TOKEN:
-        update = await request.json()
-        telegram_update = types.Update(**update)
-        await dp.process_update(telegram_update)
-        return web.Response()
-    else:
-        return web.Response(status=403)
 
-app = web.Application()
-app.router.add_post(f'/{TOKEN}', handle)
 
 
 if __name__ == '__main__':
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
-    web.run_app(app)
+       bot.start_polling()
+
     
