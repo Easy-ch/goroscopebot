@@ -4,10 +4,10 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from bs4 import BeautifulSoup
 import requests
 from config import TOKEN
-from aiogram.client.default import DefaultBotProperties
+
 import asyncio
 
-bot = Bot(token=TOKEN,default=DefaultBotProperties(parse_mode='HTML'))
+bot = Bot(token=TOKENparse_mode='HTML')
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
@@ -106,4 +106,13 @@ async def pisces(message: types.Message):
 
 
 if __name__ == '__main__':
-    
+        start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
+
